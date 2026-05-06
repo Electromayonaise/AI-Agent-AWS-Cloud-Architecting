@@ -19,7 +19,11 @@ API_GATEWAY_URL = os.getenv("API_GATEWAY_URL", "")
 
 # Gemini
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
-MODEL_NAME = os.getenv("MODEL_NAME", "gemini-2.0-flash-exp")
+
+# Groq
+GROQ_API_KEY = os.getenv("GROQ_API_KEY")
+
+MODEL_NAME = os.getenv("MODEL_NAME", "llama-3.3-70b-versatile")
 LLM_TEMPERATURE = float(os.getenv("LLM_TEMPERATURE", "0"))
 
 # Preset sizes

@@ -37,9 +37,16 @@ def _call_lambda(payload: dict) -> dict:
         result = json.loads(response["Payload"].read())
 
     # API Gateway wraps the Lambda return value in a 'body' string
-    if "body" in result:
+    if isinstance(result, dict) and "body" in result:
         body = result["body"]
-        return json.loads(body) if isinstance(body, str) else body
+        parsed = json.loads(body) if isinstance(body, str) else body
+        # If body decoded to a plain string (e.g. old Lambda code), wrap it
+        if not isinstance(parsed, dict):
+            return {"statusCode": result.get("statusCode", 200), "message": str(parsed)}
+        return parsed
+
+    if not isinstance(result, dict):
+        return {"statusCode": 500, "error": str(result)}
     return result
 
 
@@ -88,14 +95,16 @@ def resize_rotate_flip_image_tool(
         return f"Error invoking Lambda: {e}"
 
     if result.get("statusCode", 200) == 200:
-        return (
-            f"Image processed successfully.\n"
-            f"  Output: s3://{result.get('output_bucket')}/{result.get('output_key')}\n"
-            f"  Original size: {result.get('original_size')}\n"
-            f"  New size: {result.get('new_size')}\n"
-            f"  Rotation applied: {result.get('rotation')}°\n"
-            f"  Flip horizontal: {result.get('flip_horizontal')}\n"
-            f"  Flip vertical: {result.get('flip_vertical')}"
-        )
+        if result.get("output_key"):
+            return (
+                f"Image processed successfully.\n"
+                f"  Output: s3://{result.get('output_bucket')}/{result.get('output_key')}\n"
+                f"  Original size: {result.get('original_size')}\n"
+                f"  New size: {result.get('new_size')}\n"
+                f"  Rotation applied: {result.get('rotation')}°\n"
+                f"  Flip horizontal: {result.get('flip_horizontal')}\n"
+                f"  Flip vertical: {result.get('flip_vertical')}"
+            )
+        return f"Lambda responded: {result.get('message', result)}"
 
-    return f"Lambda returned an error: {result.get('error', 'Unknown error')}"
+    return f"Lambda returned an error: {result.get('error', result)}"

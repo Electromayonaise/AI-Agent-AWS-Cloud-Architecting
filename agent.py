@@ -1,9 +1,9 @@
-from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_groq import ChatGroq
 from langchain.agents import create_tool_calling_agent, AgentExecutor
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 
 from tools import resize_rotate_flip_image_tool
-from config import GOOGLE_API_KEY, MODEL_NAME, LLM_TEMPERATURE, S3_BUCKET_SOURCE, SIZE_PRESETS
+from config import GROQ_API_KEY, MODEL_NAME, LLM_TEMPERATURE, S3_BUCKET_SOURCE, SIZE_PRESETS
 
 SYSTEM_PROMPT = f"""You are an AI assistant that helps users process images stored in Amazon S3.
 
@@ -26,10 +26,10 @@ If the user does not specify a bucket, use the default.
 Always confirm the result and output S3 location after the tool runs.
 Answer in the same language the user used."""
 
-llm = ChatGoogleGenerativeAI(
+llm = ChatGroq(
     model=MODEL_NAME,
     temperature=LLM_TEMPERATURE,
-    google_api_key=GOOGLE_API_KEY,
+    groq_api_key=GROQ_API_KEY,
 )
 
 tools = [resize_rotate_flip_image_tool]
